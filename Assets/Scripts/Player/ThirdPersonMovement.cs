@@ -11,6 +11,7 @@ public class ThirdPersonMovement : MonoBehaviour
     public event Action StartJumping = delegate { };
     public event Action StartFalling = delegate { };
     public event Action StartLanding = delegate { };
+    public event Action StartThrowing = delegate { };
 
     [SerializeField] CharacterController _controller;
     [SerializeField] Transform _cam;
@@ -18,6 +19,7 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField] Transform groundCheck;
     [SerializeField] float groundDistance = 0.4f;
     [SerializeField] LayerMask groundMask;
+    [SerializeField] LayerMask boxMask;
 
     private float speed;
 
@@ -35,14 +37,19 @@ public class ThirdPersonMovement : MonoBehaviour
     Vector3 velocity;
     bool isGrounded;
 
+    Transform lookTransform;
+    [SerializeField] Transform cubeTarget;
+
     private void Start()
     {
         Idle?.Invoke();
+        lookTransform = this.transform;
     }
 
     // Update is called once per frame
     private void Update()
     {
+
         //grounded check
         isGrounded = Physics.CheckSphere(groundCheck.position, groundDistance, groundMask);
         //Debug.Log("Ground Distance: " + velocity.y);
@@ -51,6 +58,9 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             velocity.y = -2f;
             CheckIfGrounded();
+        } else
+        {
+            CheckIfAirborne();
         }
 
         //basic movement
@@ -83,7 +93,6 @@ public class ThirdPersonMovement : MonoBehaviour
         {
             StartJumping?.Invoke();
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
-            //Fall animation never functions properly due to the presence of other animations
             CheckIfAirborne();
         }
 
@@ -91,6 +100,13 @@ public class ThirdPersonMovement : MonoBehaviour
         velocity.y += gravity * Time.deltaTime;
 
         _controller.Move(velocity * Time.deltaTime);
+
+        //look at cube when summoned
+        if(isGrounded && _isMoving == false && Input.GetKeyDown(KeyCode.Mouse0))
+        {
+            lookTransform.LookAt(new Vector3(cubeTarget.position.x, lookTransform.position.y, cubeTarget.position.z));
+            StartThrowing?.Invoke();
+        }
     }
 
     private void CheckIfStartedMoving()
@@ -121,16 +137,16 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         if(isGrounded == true && Input.GetKey(KeyCode.LeftShift))
         {
-            //Recently added since I realized I needed a sprint animation
             speed = sprintSpeed;
-        } 
-        if(speed == sprintSpeed)
+        }
+
+        if(isGrounded == true && Input.GetKeyDown(KeyCode.LeftShift))
         {
             StartSprinting?.Invoke();
         }
-        else
+        else if (Input.GetKeyUp(KeyCode.LeftShift))
         {
-            CheckIfStartedMoving();
+            StartRunning.Invoke();
         }
     }
 
@@ -139,31 +155,26 @@ public class ThirdPersonMovement : MonoBehaviour
         if(_isAirborne == true)
         {
             StartFalling?.Invoke();
-            Debug.Log("Airborne: " + _isAirborne);
+            //Debug.Log("Airborne: " + _isAirborne);
         }
         _isAirborne = false;
     }
 
     private void CheckIfGrounded()
     {
-        if (_isAirborne == false)
+        if (_isAirborne == false && _isMoving == false)
         {
-            //Recently added a landing animation!
-			//Landing animation kind of works since it's called on line 53
-            //but Landing cannot transition to Idle or Running
 			StartLanding?.Invoke();
-            Debug.Log("Airborne: " + _isAirborne);
-            //CheckIfStoppedMoving();
+            //Debug.Log("Airborne: " + _isAirborne);
+        }
+        if (_isAirborne == false && _isMoving == true)
+        {
+            StartRunning?.Invoke();
+        }
+        if (_isAirborne == false && _isMoving == true && Input.GetKey(KeyCode.LeftShift))
+        {
+            StartSprinting?.Invoke();
         }
         _isAirborne = true;
-
     }
 }
-//If all else fails, I'm willing to utilize Mechanim to integrate all remaining animations
-//I wanted to try hard coding everything if possible cuz I was told it may be easier to debug
-//I apologize for the mess between lines  84 & 159
-
-//known issues: 
-//Jumping, Falling, and Sprinting animations never play properly
-//Landing cannot transition to Idle
-//Landing or Running can transition from Falling, but Falling currently doesn't work

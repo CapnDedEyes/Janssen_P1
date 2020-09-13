@@ -15,6 +15,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
     const string JumpState = "Jumping";
     const string FallState = "Falling";
     const string LandState = "Landing";
+    const string ThrowState = "Throwing";
 
     Animator _animator = null;
 
@@ -53,6 +54,11 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.CrossFadeInFixedTime(LandState, transitionDuration);
     }
 
+    private void OnStartThrowing()
+    {
+        _animator.CrossFadeInFixedTime(ThrowState, transitionDuration);
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
@@ -61,6 +67,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartJumping += OnStartJumping;
         _thirdPersonMovement.StartFalling += OnStartFalling;
         _thirdPersonMovement.StartLanding += OnStartLanding;
+        _thirdPersonMovement.StartThrowing += OnStartThrowing;
     }
 
     private void OnDisable()
@@ -71,5 +78,6 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartJumping -= OnStartJumping;
         _thirdPersonMovement.StartFalling -= OnStartFalling;
         _thirdPersonMovement.StartLanding -= OnStartLanding;
+        _thirdPersonMovement.StartThrowing -= OnStartThrowing;
     }
 }
