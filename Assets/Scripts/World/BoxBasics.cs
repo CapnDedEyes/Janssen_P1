@@ -12,7 +12,10 @@ public class BoxBasics : MonoBehaviour
 
     private float growRate = -10f;
     public bool projectile;
+    public bool hazard;
+
     bool shrinking;
+    
 
     public void Start()
     {
@@ -31,6 +34,18 @@ public class BoxBasics : MonoBehaviour
     public void OnCollisionEnter(Collision collision)
     {
         if(box.tag == "BoxWorld" && collision.gameObject.tag == "Box")
+        {
+            BoxDestroy();
+        }
+        if (collision.gameObject.tag == "Player" && hazard == true)
+        {
+            BoxDestroy();
+        }
+    }
+
+    public void OnTriggerEnter(Collider collision)
+    {
+        if (collision.gameObject.tag == "Player" && hazard == true)
         {
             BoxDestroy();
         }

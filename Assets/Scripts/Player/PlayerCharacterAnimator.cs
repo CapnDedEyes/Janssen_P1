@@ -16,6 +16,8 @@ public class PlayerCharacterAnimator : MonoBehaviour
     const string FallState = "Falling";
     const string LandState = "Landing";
     const string ThrowState = "Throwing";
+    const string DamagedState = "Damaged";
+    const string DyingState = "Dying";
 
     Animator _animator = null;
 
@@ -59,6 +61,16 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _animator.CrossFadeInFixedTime(ThrowState, transitionDuration);
     }
 
+    private void OnDamaged()
+    {
+        _animator.CrossFadeInFixedTime(DamagedState, transitionDuration);
+    }
+
+    private void OnDying()
+    {
+        _animator.CrossFadeInFixedTime(DyingState, transitionDuration);
+    }
+
     private void OnEnable()
     {
         _thirdPersonMovement.Idle += OnIdle;
@@ -68,6 +80,8 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartFalling += OnStartFalling;
         _thirdPersonMovement.StartLanding += OnStartLanding;
         _thirdPersonMovement.StartThrowing += OnStartThrowing;
+        _thirdPersonMovement.Damaged += OnDamaged;
+        _thirdPersonMovement.Dying += OnDying;
     }
 
     private void OnDisable()
@@ -79,5 +93,7 @@ public class PlayerCharacterAnimator : MonoBehaviour
         _thirdPersonMovement.StartFalling -= OnStartFalling;
         _thirdPersonMovement.StartLanding -= OnStartLanding;
         _thirdPersonMovement.StartThrowing -= OnStartThrowing;
+        _thirdPersonMovement.Damaged -= OnDamaged;
+        _thirdPersonMovement.Dying -= OnDying;
     }
 }
