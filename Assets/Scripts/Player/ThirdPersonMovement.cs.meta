@@ -3,7 +3,18 @@ guid: 1e713d5f13083dc42b6b1ebbd61c28d4
 MonoImporter:
   externalObjects: {}
   serializedVersion: 2
-  defaultReferences: []
+  defaultReferences:
+  - flashColor: {fileID: 2100000, guid: 514a9f12a5ada484faa238c11afe8d0a, type: 2}
+  - normalColor: {fileID: 2100000, guid: d4792b927418a0e4f9217d74638941b3, type: 2}
+  - _renderer: {instanceID: 0}
+  - _damageSound: {fileID: 8300000, guid: 06098cc73ab718b4fa19b60a9e2b6168, type: 3}
+  - _deathSound: {fileID: 8300000, guid: 115f0d4cd5a6e354ebf21c36a9933ae7, type: 3}
+  - _jumpSound: {fileID: 8300000, guid: 27f90f030bc1f8f4c8b3f141cbee0f11, type: 3}
+  - _landingSound: {fileID: 8300000, guid: 00396f4140422ec449592a8042947920, type: 3}
+  - _controller: {instanceID: 0}
+  - _cam: {instanceID: 0}
+  - groundCheck: {instanceID: 0}
+  - cubeTarget: {instanceID: 0}
   executionOrder: 0
   icon: {instanceID: 0}
   userData: 

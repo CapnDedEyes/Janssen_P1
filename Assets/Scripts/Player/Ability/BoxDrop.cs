@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class BoxToss : Ability
+public class BoxDrop : Ability
 {
     [SerializeField] GameObject _boxSpawned = null;
     [SerializeField] Transform _firingPoint;
-    [SerializeField] AudioClip _tossSound;
+    [SerializeField] AudioClip _dropSound;
 
     public override void Use(Transform firingPoint)
     {
-        AudioHelper.PlayClip2D(_tossSound, 1f);
+        AudioHelper.PlayClip2D(_dropSound, 1f);
 
         firingPoint = _firingPoint;
         GameObject projectile = Instantiate

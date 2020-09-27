@@ -8,7 +8,6 @@ public class AbilityLoadout : MonoBehaviour
 
     public void EquipAbility (Ability ability)
     {
-        //NEEDS SFX
         RemoveCurrentAbilityObject();
         CreateNewAbilityObject(ability);
     }

@@ -23,9 +23,17 @@ public class ThirdPersonMovement : MonoBehaviour
     [SerializeField] float flashTime = 0.1f;
     [SerializeField] float flashDuration = 5f;
 
+    [Header("VFX")]
+    [SerializeField] GameObject damageParticle;
+    [SerializeField] GameObject chargeParticle;
+    [SerializeField] GameObject landParticle;
+
     [Header("SFX")]
     [SerializeField] AudioClip _damageSound;
     [SerializeField] AudioClip _deathSound;
+    [SerializeField] AudioClip _jumpSound;
+    [SerializeField] AudioClip _landingSound;
+    [SerializeField] AudioClip _chargeSound;
 
     [Header("Camera")]
     [SerializeField] CharacterController _controller;
@@ -47,6 +55,10 @@ public class ThirdPersonMovement : MonoBehaviour
 
     [Header("Abilities")]
     [SerializeField] Transform cubeTarget;
+    [SerializeField] float chargeTime = 0.7f;
+    [SerializeField] float reloadTime = 0.3f;
+    [SerializeField] PlayerAbility _playerAbility;
+    [SerializeField] BoxToss projectile;
 
     //Movement
     Transform lookTransform;
@@ -58,8 +70,9 @@ public class ThirdPersonMovement : MonoBehaviour
     bool _isAirborne = true;
     bool _isDamaged = false;
     bool _isDead = false;
+    bool _isCharging = false;
     bool isGrounded;
-
+    bool reloaded = true;
     
 
     private void Awake()
@@ -72,6 +85,7 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         Idle?.Invoke();
         lookTransform = this.transform;
+        Cursor.visible = false;
     }
 
     // Update is called once per frame
@@ -124,6 +138,7 @@ public class ThirdPersonMovement : MonoBehaviour
                 if (isGrounded && Input.GetButtonDown("Jump"))
                 {
                     StartJumping?.Invoke();
+                    AudioHelper.PlayClip2D(_jumpSound, 1f);
                     velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
                     CheckIfAirborne();
                 }
@@ -133,16 +148,55 @@ public class ThirdPersonMovement : MonoBehaviour
 
                 _controller.Move(velocity * Time.deltaTime);
 
-                //look at cube when summoned
-                if (isGrounded && _isMoving == false && Input.GetKeyDown(KeyCode.Mouse0))
+
+                if (isGrounded && _isMoving == false && 
+                    Input.GetKeyDown(KeyCode.Mouse0) && reloaded == true)
                 {
                     lookTransform.LookAt(new Vector3(cubeTarget.position.x, lookTransform.position.y, cubeTarget.position.z));
+                    _playerAbility.UseMain();
                     StartThrowing?.Invoke();
+                    StartCoroutine(Reload());
+                    StartCoroutine(Charge());
+                }
+                if (isGrounded && _isMoving == false && _isCharging == true &&
+                    Input.GetKey(KeyCode.Mouse0) && reloaded == true)
+                {
+                    lookTransform.LookAt(new Vector3(cubeTarget.position.x, lookTransform.position.y, cubeTarget.position.z));
+                    Instantiate(chargeParticle, cubeTarget.position, cubeTarget.rotation);
+                    StartThrowing?.Invoke();
+                    //Debug.Log("Charging...");
+                }
+
+                if(isGrounded && _isMoving == false && _isCharging == true &&
+                    Input.GetKeyUp(KeyCode.Mouse0))
+                {
+                    _isCharging = false;
+                    _playerAbility.UseSub();
+                    StartThrowing?.Invoke();
+                    //Debug.Log("Release!");
                 }
             }
+        }  
+    }
+
+    IEnumerator Charge ()
+    {
+        _isCharging = false;
+        reloaded = false;
+        yield return new WaitForSeconds(chargeTime);
+        if (Input.GetKey(KeyCode.Mouse0))
+        {
+            _isCharging = true;
+            reloaded = true;
+            AudioHelper.PlayClip2D(_chargeSound, 1f);
         }
-        
-        
+    }
+
+    IEnumerator Reload()
+    {
+        reloaded = false;
+        yield return new WaitForSeconds(reloadTime);
+        reloaded = true;
     }
 
     private void CheckIfStartedMoving()
@@ -200,18 +254,27 @@ public class ThirdPersonMovement : MonoBehaviour
     {
         if (_isAirborne == false && _isMoving == false)
         {
-			StartLanding?.Invoke();
+            Landing();
+            StartLanding?.Invoke();
             //Debug.Log("Airborne: " + _isAirborne);
         }
-        if (_isAirborne == false && _isMoving == true)
+        else if (_isAirborne == false && _isMoving == true)
         {
+            Landing();
             StartRunning?.Invoke();
         }
-        if (_isAirborne == false && _isMoving == true && Input.GetKey(KeyCode.LeftShift))
+        else if (_isAirborne == false && _isMoving == true && Input.GetKey(KeyCode.LeftShift))
         {
+            Landing();
             StartSprinting?.Invoke();
         }
         _isAirborne = true;
+    }
+
+    private void Landing ()
+    {
+        AudioHelper.PlayClip2D(_landingSound, 1f);
+        Instantiate(landParticle, transform.position, transform.rotation);
     }
 
     public void CheckIfDamaged()
@@ -219,6 +282,7 @@ public class ThirdPersonMovement : MonoBehaviour
         _isDamaged = true;
         Damaged?.Invoke();
         AudioHelper.PlayClip2D(_damageSound, 1f);
+        Instantiate(damageParticle, transform.position, transform.rotation);
         StartCoroutine(Flash());
         StartCoroutine(Stun());
     }

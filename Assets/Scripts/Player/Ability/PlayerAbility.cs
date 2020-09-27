@@ -6,6 +6,9 @@ public class PlayerAbility : MonoBehaviour
 {
     [SerializeField] AbilityLoadout _abilityLoadout;
     [SerializeField] Ability _mainAbility;
+    [SerializeField] Ability _subAbility;
+
+    private int timer = 0;
 
     private void Awake()
     {
@@ -15,11 +18,15 @@ public class PlayerAbility : MonoBehaviour
         }
     }
 
-    private void Update()
+    public void UseMain()
     {
-        if(Input.GetKeyDown(KeyCode.Mouse0))
-        {
-            _abilityLoadout.UseAbility();
-        }
+        _abilityLoadout?.EquipAbility(_mainAbility);
+        _abilityLoadout.UseAbility();
+    }
+
+    public void UseSub()
+    {
+        _abilityLoadout?.EquipAbility(_subAbility);
+        _abilityLoadout.UseAbility();
     }
 }
